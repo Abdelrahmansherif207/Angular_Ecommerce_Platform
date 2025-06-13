@@ -1,0 +1,306 @@
+<!-- Admin Products Management Page -->
+<div class="container mx-auto py-6">
+  <!-- Header with Search and Add Product -->
+  <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center space-x-4">
+      <h2 class="text-2xl font-bold text-gray-900">Products Management</h2>
+      <div class="relative">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="searchProducts()"
+          placeholder="Search products..."
+          class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <i
+          class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        ></i>
+      </div>
+    </div>
+    <button
+      (click)="showProductForm = true"
+      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center"
+    >
+      <i class="fas fa-plus mr-2"></i>
+      Add Product
+    </button>
+  </div>
+
+  <!-- Error Message -->
+  <div
+    *ngIf="error"
+    class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+  >
+    <span class="block sm:inline">{{ error }}</span>
+  </div>
+
+  <!-- Products Table -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Image
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Name
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Category
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Price
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Stock
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let product of filteredProducts" class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <img
+                [src]="product.imageUrl"
+                [alt]="product.name"
+                class="h-12 w-12 object-cover rounded"
+              />
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900">
+                {{ product.name }}
+              </div>
+              <div class="text-sm text-gray-500 truncate max-w-xs">
+                {{ product.description }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span
+                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800"
+              >
+                {{ product.category }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ product.price | currency }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span
+                [class]="product.stock > 0 ? 'text-green-600' : 'text-red-600'"
+                class="text-sm font-medium"
+              >
+                {{ product.stock }}
+              </span>
+            </td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2"
+            >
+              <button
+                (click)="openEditForm(product)"
+                class="text-indigo-600 hover:text-indigo-900"
+              >
+                <i class="fas fa-edit"></i>
+                Edit
+              </button>
+              <button
+                (click)="deleteProduct(product)"
+                class="text-red-600 hover:text-red-900"
+              >
+                <i class="fas fa-trash"></i>
+                Delete
+              </button>
+            </td>
+          </tr>
+
+          <!-- Empty State -->
+          <tr *ngIf="filteredProducts.length === 0">
+            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+              <div
+                *ngIf="isLoading"
+                class="flex justify-center items-center space-x-2"
+              >
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Loading products...</span>
+              </div>
+              <div *ngIf="!isLoading">
+                No products found.
+                <button
+                  (click)="showProductForm = true"
+                  class="text-blue-600 hover:text-blue-800 ml-2"
+                >
+                  Add one now
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Product Form Modal -->
+  <div
+    *ngIf="showProductForm"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold">
+          {{ editingProduct ? "Edit" : "Add" }} Product
+        </h3>
+        <button
+          (click)="cancelEdit()"
+          class="text-gray-500 hover:text-gray-700"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form
+        [formGroup]="productForm"
+        (ngSubmit)="editingProduct ? updateProduct() : createProduct()"
+        class="space-y-4"
+      >
+        <!-- Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Name</label>
+          <input
+            type="text"
+            formControlName="name"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+          <p
+            class="mt-1 text-sm text-red-600"
+            *ngIf="productForm.get('name')?.errors?.['required'] && productForm.get('name')?.touched"
+          >
+            Name is required
+          </p>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700"
+            >Description</label
+          >
+          <textarea
+            formControlName="description"
+            rows="3"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          ></textarea>
+          <p
+            class="mt-1 text-sm text-red-600"
+            *ngIf="productForm.get('description')?.errors?.['required'] && productForm.get('description')?.touched"
+          >
+            Description is required
+          </p>
+        </div>
+
+        <!-- Price and Stock -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Price</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <div
+                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+              >
+                <span class="text-gray-500 sm:text-sm">$</span>
+              </div>
+              <input
+                type="number"
+                formControlName="price"
+                class="pl-7 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+            <p
+              class="mt-1 text-sm text-red-600"
+              *ngIf="productForm.get('price')?.errors?.['required'] && productForm.get('price')?.touched"
+            >
+              Price is required
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Stock</label>
+            <input
+              type="number"
+              formControlName="stock"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+            <p
+              class="mt-1 text-sm text-red-600"
+              *ngIf="productForm.get('stock')?.errors?.['required'] && productForm.get('stock')?.touched"
+            >
+              Stock is required
+            </p>
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700"
+            >Category</label
+          >
+          <select
+            formControlName="category"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          >
+            <option value="">Select a category</option>
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </option>
+          </select>
+          <p
+            class="mt-1 text-sm text-red-600"
+            *ngIf="productForm.get('category')?.errors?.['required'] && productForm.get('category')?.touched"
+          >
+            Category is required
+          </p>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-end space-x-3">
+          <button
+            type="button"
+            (click)="cancelEdit()"
+            class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="productForm.invalid || isLoading"
+            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+          >
+            <i *ngIf="isLoading" class="fas fa-spinner fa-spin mr-2"></i>
+            {{ editingProduct ? "Update" : "Create" }} Product
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div
+    *ngIf="isLoading"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div
+      class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"
+    ></div>
+  </div>
+</div>

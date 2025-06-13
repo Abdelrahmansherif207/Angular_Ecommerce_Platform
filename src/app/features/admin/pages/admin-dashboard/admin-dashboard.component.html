@@ -1,0 +1,54 @@
+<!-- Admin Dashboard Layout -->
+<div class="min-h-screen bg-gray-100">
+  <!-- Sidebar -->
+  <aside
+    class="fixed inset-y-0 left-0 bg-gray-800 w-64 transition-transform duration-300 transform"
+  >
+    <div class="flex items-center justify-between p-4 border-b border-gray-700">
+      <span class="text-white text-xl font-semibold">Admin Dashboard</span>
+    </div>
+
+    <nav class="mt-5 px-2">
+      <a
+        routerLink="/admin/products"
+        routerLinkActive="bg-gray-900 text-white"
+        class="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
+      >
+        <i class="fas fa-box mr-3"></i>
+        Products
+      </a>
+
+      <a
+        routerLink="/admin/orders"
+        routerLinkActive="bg-gray-900 text-white"
+        class="mt-1 group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white"
+      >
+        <i class="fas fa-shopping-cart mr-3"></i>
+        Orders
+      </a>
+
+      <button
+        (click)="logout()"
+        class="mt-1 w-full group flex items-center px-2 py-2 text-base font-medium rounded-md text-red-300 hover:bg-gray-700 hover:text-red-200"
+      >
+        <i class="fas fa-sign-out-alt mr-3"></i>
+        Logout
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="pl-64">
+    <!-- Top Navigation -->
+    <header class="bg-white shadow-sm">
+      <div class="h-16 flex items-center justify-between px-4">
+        <h1 class="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="p-6">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

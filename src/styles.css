@@ -1,1 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+
+:root {
+    --color-bg: #ffffff;
+    --color-surface: #f4f4f5; /* zinc-100 */
+    --color-border: #e4e4e7;  /* zinc-200 */
+    --color-text-primary: #18181b; /* zinc-900 */
+    --color-text-secondary: #52525b; /* zinc-600 */
+    --color-text-muted: #a1a1aa; /* zinc-400 */
+    --color-black: #000000;
+    --color-white: #ffffff;
+  }

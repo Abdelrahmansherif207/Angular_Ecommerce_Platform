@@ -1,0 +1,334 @@
+<nav
+  class="bg-gradient-to-r from-gray-900 to-black sticky top-0 z-50 shadow-lg"
+>
+  <div class="container mx-auto px-4">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo and brand name -->
+      <div class="flex items-center">
+        <a
+          routerLink="/"
+          class="flex items-center space-x-2 group transition-transform duration-300 hover:scale-105"
+        >
+          <div
+            class="w-8 h-8 bg-white rounded-lg flex items-center justify-center relative overflow-hidden shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+          >
+            <span class="text-black font-extrabold text-lg">1</span>
+            <div
+              class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"
+            ></div>
+          </div>
+          <span class="text-white font-bold text-xl tracking-wide">v9</span>
+        </a>
+      </div>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center space-x-1">
+        <!-- Admin: Website dropdown -->
+        <ng-container *ngIf="isAdmin(); else userNav">
+          <div class="relative group" tabindex="0">
+            <button
+              class="flex items-center text-white/80 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200 relative focus:outline-none"
+            >
+              <i class="fas fa-globe mr-2"></i>
+              <span>Website</span>
+              <i class="fas fa-caret-down ml-2"></i>
+            </button>
+            <div
+              class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50 hidden group-hover:block group-focus-within:block"
+              (mouseenter)="$event.stopPropagation()"
+              (mouseleave)="$event.stopPropagation()"
+            >
+              <a
+                routerLink="/home"
+                class="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >Home</a
+              >
+              <a
+                routerLink="/products"
+                class="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >Products</a
+              >
+              <a
+                routerLink="/admin/users"
+                class="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                >Users</a
+              >
+            </div>
+          </div>
+          <a
+            routerLink="/admin"
+            class="flex items-center text-white/80 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200 relative"
+          >
+            <i class="fas fa-tools mr-2"></i>
+            <span>Admin Dashboard</span>
+          </a>
+        </ng-container>
+        <ng-template #userNav>
+          <a
+            routerLink="/"
+            routerLinkActive="bg-white/15 font-semibold after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-5 after:h-0.5 after:bg-blue-500 after:rounded"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="flex items-center text-white/80 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200 relative"
+          >
+            <i class="fas fa-home mr-2"></i>
+            <span>Home</span>
+          </a>
+          <a
+            routerLink="/products"
+            routerLinkActive="bg-white/15 font-semibold after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-5 after:h-0.5 after:bg-blue-500 after:rounded"
+            class="flex items-center text-white/80 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200 relative"
+          >
+            <i class="fas fa-store mr-2"></i>
+            <span>Products</span>
+          </a>
+          <a
+            routerLink="/profile"
+            routerLinkActive="bg-white/15 font-semibold after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-5 after:h-0.5 after:bg-blue-500 after:rounded"
+            class="flex items-center text-white/80 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200 relative"
+          >
+            <i class="fas fa-user-circle mr-2"></i>
+            <span>Profile</span>
+          </a>
+        </ng-template>
+      </div>
+
+      <!-- User actions -->
+      <div class="hidden md:flex items-center space-x-4">
+        <a
+          routerLink="/cart"
+          class="relative text-white p-2 rounded-full hover:bg-white/10 transition-colors duration-200"
+          aria-label="Shopping Cart"
+        >
+          <i class="fas fa-shopping-cart"></i>
+          <span
+            *ngIf="cartCount > 0"
+            class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
+          >
+            {{ cartCount }}
+          </span>
+
+          >
+        </a>
+
+        <!-- Show login button if not authenticated -->
+        <a
+          *ngIf="!isLoggedIn"
+          routerLink="/auth/login"
+          class="flex items-center text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+          aria-label="Login"
+        >
+          <i class="fas fa-sign-in-alt mr-2"></i>
+          <span>Login</span>
+        </a>
+
+        <!-- Show user profile when authenticated -->
+        <div
+          *ngIf="isLoggedIn && currentUser"
+          class="flex items-center space-x-3"
+        >
+          <div class="relative group">
+            <div
+              class="w-9 h-9 rounded-full overflow-hidden border-2 border-white/20 cursor-pointer hover:border-white/40 transition-all duration-200"
+            >
+              <img
+                [src]="currentUser?.profilePicture || '/images/pp.png'"
+                alt="Profile"
+                class="w-full h-full object-cover"
+                (error)="handleImageError($event)"
+              />
+            </div>
+            <!-- Dropdown menu -->
+            <div
+              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl overflow-hidden z-50 scale-0 group-hover:scale-100 origin-top-right transition-transform duration-200 ease-out"
+            >
+              <div class="py-2 border-b border-gray-100">
+                <p class="px-4 text-sm font-medium text-gray-800">
+                  {{
+                    (currentUser?.firstName || "") +
+                      " " +
+                      (currentUser?.lastName || "")
+                  }}
+                </p>
+                <p class="px-4 text-xs text-gray-500">
+                  {{ currentUser?.email || "" }}
+                </p>
+              </div>
+              <a
+                routerLink="/profile"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                <i class="fas fa-user-circle mr-2"></i> My Profile
+              </a>
+              <a
+                (click)="logout()"
+                class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
+              >
+                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search button (desktop) -->
+      <!-- <div class="hidden md:flex items-center ml-4">
+        <button
+          type="button"
+          (click)="toggleSearch()"
+          class="text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors duration-200"
+          aria-label="Search"
+        >
+          <i
+            class="fas"
+            [ngClass]="isSearchOpen ? 'fa-times' : 'fa-search'"
+          ></i>
+        </button>
+      </div> -->
+
+      <!-- Mobile menu button -->
+      <div class="md:hidden flex items-center gap-4">
+        <a
+          routerLink="/cart"
+          class="relative text-white p-2 rounded-full hover:bg-white/10 transition-colors duration-200"
+          aria-label="Shopping Cart"
+        >
+          <i class="fas fa-shopping-cart"></i>
+          <span
+            class="absolute -top-1 -right-1 bg-blue-500 text-white text-xs w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-md"
+            >0</span
+          >
+        </a>
+
+        <!-- Show user profile image on mobile if logged in -->
+        <div *ngIf="isLoggedIn" class="relative">
+          <div
+            class="w-8 h-8 rounded-full overflow-hidden border-2 border-white/20"
+          >
+            <img
+              [src]="currentUser?.profilePicture || '/images/pp.png'"
+              alt="Profile"
+              class="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="toggleMenu()"
+          class="text-white p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200"
+          aria-label="Menu"
+        >
+          <i class="fas" [ngClass]="isMenuOpen ? 'fa-times' : 'fa-bars'"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search bar (expands when search is clicked) -->
+    <div *ngIf="isSearchOpen" class="py-4 border-t border-white/10">
+      <div
+        class="flex items-center bg-white rounded-full overflow-hidden shadow-md"
+      >
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search for products..."
+          class="w-full py-2 px-4 focus:outline-none text-gray-800"
+          (keyup.enter)="searchProducts()"
+        />
+        <button
+          (click)="searchProducts()"
+          class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors duration-200"
+        >
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div
+      *ngIf="isMenuOpen"
+      class="flex flex-col py-4 border-t border-white/10 bg-black/95 rounded-b-2xl"
+    >
+      <ng-container *ngIf="isAdmin(); else userMobileNav">
+        <a
+          routerLink="/"
+          class="flex items-center text-white py-3 px-4 hover:bg-white/5 transition-colors duration-200 border-l-4 border-transparent"
+        >
+          <i class="fas fa-globe w-6 mr-3"></i>
+          <span>Website</span>
+        </a>
+        <a
+          routerLink="/admin"
+          class="flex items-center text-blue-400 py-3 px-4 hover:bg-blue-600/80 transition-colors duration-200 border-l-4 border-blue-400 font-bold"
+        >
+          <i class="fas fa-tools w-6 mr-3"></i>
+          <span>Admin Dashboard</span>
+        </a>
+      </ng-container>
+      <ng-template #userMobileNav>
+        <a
+          routerLink="/"
+          routerLinkActive="border-l-4 border-blue-500 bg-white/5"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="flex items-center text-white py-3 px-4 hover:bg-white/5 transition-colors duration-200 border-l-4 border-transparent"
+        >
+          <i class="fas fa-home w-6 mr-3"></i>
+          <span>Home</span>
+        </a>
+        <a
+          routerLink="/products"
+          routerLinkActive="border-l-4 border-blue-500 bg-white/5"
+          class="flex items-center text-white py-3 px-4 hover:bg-white/5 transition-colors duration-200 border-l-4 border-transparent"
+        >
+          <i class="fas fa-store w-6 mr-3"></i>
+          <span>Products</span>
+        </a>
+        <a
+          routerLink="/profile"
+          routerLinkActive="border-l-4 border-blue-500 bg-white/5"
+          class="flex items-center text-white py-3 px-4 hover:bg-white/5 transition-colors duration-200 border-l-4 border-transparent"
+        >
+          <i class="fas fa-user-circle w-6 mr-3"></i>
+          <span>Profile</span>
+        </a>
+      </ng-template>
+
+      <!-- Conditional login/logout in mobile menu -->
+      <a
+        *ngIf="!isLoggedIn"
+        routerLink="/auth/login"
+        routerLinkActive="border-l-4 border-blue-500 bg-white/5"
+        class="flex items-center text-white py-3 px-4 hover:bg-white/5 transition-colors duration-200 border-l-4 border-transparent"
+      >
+        <i class="fas fa-sign-in-alt w-6 mr-3"></i>
+        <span>Login</span>
+      </a>
+
+      <a
+        *ngIf="isLoggedIn"
+        (click)="logout()"
+        class="flex items-center text-white py-3 px-4 hover:bg-white/5 transition-colors duration-200 border-l-4 border-transparent cursor-pointer"
+      >
+        <i class="fas fa-sign-out-alt w-6 mr-3 text-red-400"></i>
+        <span class="text-red-400">Logout</span>
+      </a>
+      <div class="p-4 mt-2">
+        <div class="flex items-center bg-white/10 rounded-full overflow-hidden">
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            placeholder="Search products..."
+            class="w-full py-2 px-4 focus:outline-none bg-transparent text-white placeholder-gray-300"
+            (keyup.enter)="searchProducts()"
+          />
+          <button
+            (click)="searchProducts()"
+            class="px-4 py-2 text-white bg-white/10 hover:bg-white/20 transition-colors duration-200"
+          >
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

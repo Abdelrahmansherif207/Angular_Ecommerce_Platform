@@ -1,0 +1,17 @@
+For actual implementation, you would place real product images in this directory.
+
+Each image should be named according to the product type:
+- headphones.jpg
+- smartwatch.jpg
+- wallet.jpg
+- coffeemaker.jpg
+- chair.jpg
+- speaker.jpg
+- sunglasses.jpg
+- waterbottle.jpg
+- charger.jpg
+- yogamat.jpg
+- keyboard.jpg
+- messengerbag.jpg
+
+Until you have the actual product images, you can update the product.component.html and product-detail.component.html to use a default placeholder image when the product image isn't found.

@@ -1,0 +1,443 @@
+<section class="container mx-auto py-8 px-4">
+  <!-- Toast notification -->
+  <div
+    *ngIf="successMessage"
+    class="fixed top-6 right-6 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-fade-in-out"
+  >
+    <i class="fas fa-check-circle mr-2"></i> {{ successMessage }}
+  </div>
+
+  <!-- Header with title and stats -->
+  <div
+    class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+  >
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">Products</h1>
+      <p *ngIf="filteredProducts.length > 0" class="text-gray-500 mt-1">
+        Showing
+        <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span>
+        to
+        <span class="font-medium">{{
+          Math.min(currentPage * pageSize, filteredProducts.length)
+        }}</span>
+        of
+        <span class="font-medium">{{ filteredProducts.length }}</span> products
+      </p>
+    </div>
+
+    <!-- Sorting options -->
+    <div class="flex items-center space-x-2 bg-white rounded-lg shadow-sm p-2">
+      <span class="text-sm text-gray-600 mr-1">Sort by:</span>
+      <button
+        (click)="changeSorting('newest')"
+        [ngClass]="{
+          'bg-black text-white': sortBy === 'newest',
+          'hover:bg-gray-100': sortBy !== 'newest'
+        }"
+        class="px-3 py-1.5 text-sm rounded-md transition-colors flex items-center"
+      >
+        Newest
+        <i
+          *ngIf="sortBy === 'newest'"
+          class="fas fa-sort-amount-{{
+            sortDirection === 'asc' ? 'up' : 'down'
+          }} ml-1 text-xs"
+        ></i>
+      </button>
+      <button
+        (click)="changeSorting('name')"
+        [ngClass]="{
+          'bg-black text-white': sortBy === 'name',
+          'hover:bg-gray-100': sortBy !== 'name'
+        }"
+        class="px-3 py-1.5 text-sm rounded-md transition-colors flex items-center"
+      >
+        Name
+        <i
+          *ngIf="sortBy === 'name'"
+          class="fas fa-sort-alpha-{{
+            sortDirection === 'asc' ? 'up' : 'down'
+          }} ml-1 text-xs"
+        ></i>
+      </button>
+      <button
+        (click)="changeSorting('price')"
+        [ngClass]="{
+          'bg-black text-white': sortBy === 'price',
+          'hover:bg-gray-100': sortBy !== 'price'
+        }"
+        class="px-3 py-1.5 text-sm rounded-md transition-colors flex items-center"
+      >
+        Price
+        <i
+          *ngIf="sortBy === 'price'"
+          class="fas fa-sort-numeric-{{
+            sortDirection === 'asc' ? 'up' : 'down'
+          }} ml-1 text-xs"
+        ></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-6">
+    <!-- Sidebar with filters -->
+    <div class="w-full lg:w-1/4 shrink-0">
+      <div class="bg-white rounded-lg shadow-md p-5 sticky top-20">
+        <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">
+          Filters
+        </h2>
+
+        <!-- Search input - fully rounded -->
+        <div class="mb-6">
+          <label
+            for="search"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >Search</label
+          >
+          <div class="relative">
+            <input
+              id="search"
+              type="text"
+              [(ngModel)]="searchTerm"
+              (input)="searchProducts()"
+              placeholder="Search products..."
+              class="w-full py-2 px-4 pl-10 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div
+              class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+            >
+              <i class="fas fa-search text-gray-400"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category filter -->
+        <div class="mb-6">
+          <label
+            for="category"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >Category</label
+          >
+          <select
+            id="category"
+            [(ngModel)]="selectedCategory"
+            (change)="filterByCategory()"
+            class="w-full py-2 px-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">All Categories</option>
+            <option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Reset filters button -->
+        <button
+          (click)="resetFilters()"
+          class="w-full py-2 px-4 bg-black hover:bg-gray-800 text-white rounded-lg transition-colors"
+        >
+          Reset Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Main content area -->
+    <div class="w-full lg:w-3/4">
+      <!-- View controls (view mode toggle and page size) -->
+      <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3"
+      >
+        <!-- Page size selector -->
+        <div class="flex items-center">
+          <label for="pageSize" class="text-sm text-gray-600 mr-2">Show:</label>
+          <select
+            id="pageSize"
+            [(ngModel)]="pageSize"
+            (change)="changePageSize(pageSize)"
+            class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2"
+          >
+            <option *ngFor="let size of pageSizeOptions" [value]="size">
+              {{ size }}
+            </option>
+          </select>
+        </div>
+
+        <!-- View toggle buttons -->
+        <div
+          class="flex items-center space-x-2 bg-white rounded-lg shadow-sm p-1"
+        >
+          <button
+            (click)="viewMode = 'grid'"
+            [ngClass]="{
+              'bg-black text-white': viewMode === 'grid',
+              'hover:bg-gray-100 text-gray-700': viewMode !== 'grid'
+            }"
+            class="p-2 rounded-md transition-colors"
+            aria-label="Grid view"
+          >
+            <i class="fas fa-th-large"></i>
+          </button>
+          <button
+            (click)="viewMode = 'list'"
+            [ngClass]="{
+              'bg-black text-white': viewMode === 'list',
+              'hover:bg-gray-100 text-gray-700': viewMode !== 'list'
+            }"
+            class="p-2 rounded-md transition-colors"
+            aria-label="List view"
+          >
+            <i class="fas fa-list"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+        <div
+          class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"
+        ></div>
+      </div>
+
+      <!-- Error state -->
+      <div
+        *ngIf="error && !isLoading"
+        class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded"
+      >
+        <p>{{ error }}</p>
+        <button
+          (click)="loadProducts()"
+          class="mt-2 py-1 px-3 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+
+      <!-- No results state -->
+      <div
+        *ngIf="filteredProducts.length === 0 && !isLoading && !error"
+        class="text-center py-12"
+      >
+        <i class="fas fa-search text-gray-400 text-5xl mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-700 mb-2">
+          No products found
+        </h3>
+        <p class="text-gray-500">
+          Try adjusting your search or filter to find what you're looking for.
+        </p>
+      </div>
+
+      <!-- Products grid view -->
+      <div
+        *ngIf="
+          displayedProducts.length > 0 && !isLoading && viewMode === 'grid'
+        "
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <!-- Product card -->
+        <div
+          *ngFor="let product of displayedProducts"
+          class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group"
+        >
+          <!-- Product image -->
+          <div
+            class="relative h-48 bg-gray-200 overflow-hidden cursor-pointer"
+            (click)="viewProductDetails(product.id)"
+          >
+            <img
+              [src]="product.imageUrl"
+              [alt]="product.name"
+              (error)="handleImageError($event)"
+              class="w-full h-full object-cover transition-transform hover:scale-105"
+            />
+            <span
+              *ngIf="!product.inStock"
+              class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full"
+              >Out of Stock</span
+            >
+          </div>
+
+          <!-- Product info -->
+          <div class="p-4">
+            <div class="flex justify-between items-start mb-2">
+              <h3
+                class="text-lg font-semibold text-gray-800 hover:text-blue-600 cursor-pointer"
+                (click)="viewProductDetails(product.id)"
+              >
+                {{ product.name }}
+              </h3>
+              <span class="text-lg font-bold text-blue-600"
+                >${{ product.price.toFixed(2) }}</span
+              >
+            </div>
+
+            <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+              {{ product.description }}
+            </p>
+
+            <div class="flex items-center justify-between">
+              <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">
+                {{ product.category }}
+              </span>
+
+              <button
+                (click)="addToCart(product)"
+                [disabled]="!product.inStock"
+                class="py-1.5 px-3 bg-black text-white rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+              >
+                <i class="fas fa-cart-plus mr-1"></i>
+                <span class="hidden sm:inline">Add to Cart</span>
+                <span class="sm:hidden">Add</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products list view -->
+      <div
+        *ngIf="
+          displayedProducts.length > 0 && !isLoading && viewMode === 'list'
+        "
+        class="space-y-4"
+      >
+        <!-- Product list item -->
+        <div
+          *ngFor="let product of displayedProducts"
+          class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group"
+        >
+          <div class="flex flex-col md:flex-row">
+            <!-- Product image -->
+            <div
+              class="relative w-full md:w-1/4 h-48 md:h-auto bg-gray-200 overflow-hidden cursor-pointer"
+              (click)="viewProductDetails(product.id)"
+            >
+              <img
+                [src]="product.imageUrl"
+                [alt]="product.name"
+                (error)="handleImageError($event)"
+                class="w-full h-full object-contain transition-transform group-hover:scale-105 duration-300"
+              />
+              <span
+                *ngIf="!product.inStock"
+                class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full"
+                >Out of Stock</span
+              >
+            </div>
+
+            <!-- Product info -->
+            <div class="p-4 flex-grow">
+              <div
+                class="flex flex-col md:flex-row justify-between items-start mb-2"
+              >
+                <h3
+                  class="text-xl font-semibold text-gray-800 hover:text-blue-600 cursor-pointer mb-2 md:mb-0"
+                  (click)="viewProductDetails(product.id)"
+                >
+                  {{ product.name }}
+                </h3>
+                <span class="text-xl font-bold text-blue-600"
+                  >${{ product.price.toFixed(2) }}</span
+                >
+              </div>
+
+              <p class="text-gray-600 mb-4">{{ product.description }}</p>
+
+              <div class="flex items-center justify-between mt-auto">
+                <span
+                  class="bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-lg"
+                >
+                  {{ product.category }}
+                </span>
+
+                <button
+                  (click)="addToCart(product)"
+                  [disabled]="!product.inStock"
+                  class="py-2 px-4 bg-black text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+                >
+                  <i class="fas fa-cart-plus mr-2"></i> Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination controls -->
+      <div *ngIf="totalPages > 1" class="mt-8">
+        <div class="flex flex-col sm:flex-row justify-between items-center">
+          <!-- Page info for mobile -->
+          <p class="text-sm text-gray-500 mb-4 sm:mb-0 sm:hidden">
+            Page {{ currentPage }} of {{ totalPages }}
+          </p>
+
+          <!-- Pagination buttons -->
+          <div class="flex items-center justify-center space-x-1">
+            <!-- Previous button -->
+            <button
+              (click)="previousPage()"
+              [disabled]="currentPage === 1"
+              [ngClass]="{ 'opacity-50 cursor-not-allowed': currentPage === 1 }"
+              class="flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50"
+              aria-label="Previous page"
+            >
+              <i class="fas fa-chevron-left text-sm"></i>
+            </button>
+
+            <!-- Page numbers -->
+            <ng-container *ngFor="let page of getPagesArray()">
+              <!-- Ellipsis -->
+              <span
+                *ngIf="page === -1"
+                class="flex items-center justify-center w-9 h-9 text-gray-500"
+              >
+                ...
+              </span>
+
+              <!-- Page number -->
+              <button
+                *ngIf="page !== -1"
+                (click)="goToPage(page)"
+                [ngClass]="{
+                  'bg-black text-white border-black': currentPage === page,
+                  'bg-white text-gray-700 border-gray-300 hover:bg-gray-50':
+                    currentPage !== page
+                }"
+                class="flex items-center justify-center w-9 h-9 rounded-md border font-medium transition-colors"
+              >
+                {{ page }}
+              </button>
+            </ng-container>
+
+            <!-- Next button -->
+            <button
+              (click)="nextPage()"
+              [disabled]="currentPage === totalPages"
+              [ngClass]="{
+                'opacity-50 cursor-not-allowed': currentPage === totalPages
+              }"
+              class="flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 bg-white text-gray-500 hover:bg-gray-50"
+              aria-label="Next page"
+            >
+              <i class="fas fa-chevron-right text-sm"></i>
+            </button>
+          </div>
+
+          <!-- Jump to page (desktop only) -->
+          <div class="hidden sm:flex items-center space-x-2">
+            <span class="text-sm text-gray-500">Go to page:</span>
+            <input
+              type="number"
+              [min]="1"
+              [max]="totalPages"
+              [(ngModel)]="currentPage"
+              (keyup.enter)="goToPage(currentPage)"
+              (blur)="goToPage(currentPage)"
+              class="w-16 p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <span class="text-sm text-gray-500">of {{ totalPages }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

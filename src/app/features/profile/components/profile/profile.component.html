@@ -1,0 +1,415 @@
+
+<div class="min-h-screen bg-gray-50">
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+  </div>
+
+  <!-- Main profile section -->
+  <div *ngIf="!isLoading" class="container mx-auto px-4 py-8">
+    <!-- Success message notification -->
+    <div *ngIf="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow">
+      <div class="flex items-center">
+        <i class="fas fa-check-circle mr-3 text-green-500"></i>
+        <p>{{ successMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Error message notification -->
+    <div *ngIf="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow">
+      <div class="flex items-center">
+        <i class="fas fa-exclamation-circle mr-3 text-red-500"></i>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Profile header -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div class="relative h-32 sm:h-48 bg-cover bg-center" [style.background-image]="'url(' + (profileForm.get('coverImage')?.value || '/images/default-cover.jpg') + ')'">
+        <div
+        class="absolute inset-0 bg-gradient-to-br from-black/20 to-zinc-900"
+      ></div>
+        <button *ngIf="isEditing" class="absolute top-2 right-2 bg-gray-800 bg-opacity-70 text-white p-2 rounded-full hover:bg-opacity-90 transition-all duration-200">
+          <label for="cover-image-upload" class="cursor-pointer">
+            <i class="fas fa-camera"></i>
+            <input 
+              type="file" 
+              id="cover-image-upload" 
+              class="hidden" 
+              accept="image/*"
+              (change)="changeCoverImage($event)"
+            />
+          </label>
+        </button>
+      </div>
+      <div class="px-4 sm:px-6 py-4 relative">
+        <!-- Profile picture -->
+        <div class="absolute top-0 transform -translate-y-1/2">
+          <div class="relative group cursor-pointer">
+            <img 
+              [src]="profileForm.get('profilePicture')?.value || '/images/pp.png'" 
+              alt="Profile Picture"
+              class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-b-2 border-white object-cover shadow-md transition-all duration-200 hover:shadow-lg bg-gray-100"
+              (error)="handleImageError($event)"
+            />
+            <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <label for="profile-picture-upload" class="cursor-pointer text-white p-3 rounded-full transition-all duration-200 transform hover:scale-200">
+                <i class="fas fa-camera"></i>
+                <input 
+                  type="file" 
+                  id="profile-picture-upload" 
+                  class="hidden" 
+                  accept="image/*"
+                  (change)="changeProfilePicture($event)"
+                />
+              </label>
+            </div>
+          </div>
+          <p class="text-center text-xs text-gray-500 mt-2 sm:mt-3">Click to change</p>
+        </div>
+
+        <div class="pt-16 sm:pt-20 pb-3 flex flex-col sm:flex-row sm:justify-between sm:items-end">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ profileForm.get('firstName')?.value }} {{ profileForm.get('lastName')?.value }}</h1>
+            <p class="text-gray-600">{{ profileForm.get('email')?.value }}</p>
+          </div>
+          <div class="mt-4 sm:mt-0 flex space-x-3">
+            <button 
+              *ngIf="!isEditing" 
+              (click)="toggleEditMode()" 
+              class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors flex items-center"
+            >
+              <i class="fas fa-edit mr-2"></i>
+              Edit Profile
+            </button>
+            <button 
+              (click)="handleLogout()" 
+              class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors flex items-center"
+            >
+              <i class="fas fa-sign-out-alt mr-2"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile tabs navigation -->
+    <div class="mb-6 border-b border-gray-200">
+      <div class="flex overflow-x-auto">
+        <button 
+          (click)="changeTab('profile')" 
+          [ngClass]="{'border-gray-900 text-gray-900': activeTab === 'profile', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'profile'}"
+          class="py-4 px-6 border-b-2 font-medium text-sm whitespace-nowrap focus:outline-none"
+        >
+          <i class="fas fa-user mr-2"></i>
+          Profile Details
+        </button>
+        <button 
+          (click)="changeTab('orders')" 
+          [ngClass]="{'border-gray-900 text-gray-900': activeTab === 'orders', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'orders'}"
+          class="py-4 px-6 border-b-2 font-medium text-sm whitespace-nowrap focus:outline-none"
+        >
+          <i class="fas fa-shopping-bag mr-2"></i>
+          Order History
+        </button>
+        <button 
+          (click)="changeTab('settings')" 
+          [ngClass]="{'border-gray-900 text-gray-900': activeTab === 'settings', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'settings'}"
+          class="py-4 px-6 border-b-2 font-medium text-sm whitespace-nowrap focus:outline-none"
+        >
+          <i class="fas fa-cog mr-2"></i>
+          Account Settings
+        </button>
+      </div>
+    </div>
+
+    <!-- Profile details tab -->
+    <div *ngIf="activeTab === 'profile'" class="bg-white rounded-lg shadow-md p-6">
+      <h2 class="text-xl font-semibold mb-6">Profile Information</h2>
+      
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-6">
+        <!-- Basic info section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+            <input 
+              type="text" 
+              id="firstName" 
+              formControlName="firstName" 
+              [readonly]="!isEditing"
+              [ngClass]="{'bg-gray-100': !isEditing, 'bg-white border-gray-300 focus:ring-2 focus:ring-blue-500': isEditing}"
+              class="w-full py-2 px-3 border rounded-lg focus:outline-none"
+            />
+            <p *ngIf="isEditing && getFormControlError('firstName')" class="mt-1 text-sm text-red-600">{{ getFormControlError('firstName') }}</p>
+          </div>
+          
+          <div>
+            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+            <input 
+              type="text" 
+              id="lastName" 
+              formControlName="lastName" 
+              [readonly]="!isEditing"
+              [ngClass]="{'bg-gray-100': !isEditing, 'bg-white border-gray-300 focus:ring-2 focus:ring-blue-500': isEditing}"
+              class="w-full py-2 px-3 border rounded-lg focus:outline-none"
+            />
+            <p *ngIf="isEditing && getFormControlError('lastName')" class="mt-1 text-sm text-red-600">{{ getFormControlError('lastName') }}</p>
+          </div>
+          
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+            <input 
+              type="email" 
+              id="email" 
+              formControlName="email" 
+              [readonly]="!isEditing"
+              [ngClass]="{'bg-gray-100': !isEditing, 'bg-white border-gray-300 focus:ring-2 focus:ring-blue-500': isEditing}"
+              class="w-full py-2 px-3 border rounded-lg focus:outline-none"
+            />
+            <p *ngIf="isEditing && getFormControlError('email')" class="mt-1 text-sm text-red-600">{{ getFormControlError('email') }}</p>
+          </div>
+          
+          <div>
+            <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <input 
+              type="text" 
+              id="address" 
+              formControlName="address" 
+              [readonly]="!isEditing"
+              [ngClass]="{'bg-gray-100': !isEditing, 'bg-white border-gray-300 focus:ring-2 focus:ring-blue-500': isEditing}"
+              class="w-full py-2 px-3 border rounded-lg focus:outline-none"
+            />
+            <p *ngIf="isEditing && getFormControlError('address')" class="mt-1 text-sm text-red-600">{{ getFormControlError('address') }}</p>
+          </div>
+          
+          <div>
+            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <input 
+              type="tel" 
+              id="phone" 
+              formControlName="phone" 
+              [readonly]="!isEditing"
+              [ngClass]="{'bg-gray-100': !isEditing, 'bg-white border-gray-300 focus:ring-2 focus:ring-blue-500': isEditing}"
+              class="w-full py-2 px-3 border rounded-lg focus:outline-none"
+            />
+            <p *ngIf="isEditing && getFormControlError('phone')" class="mt-1 text-sm text-red-600">{{ getFormControlError('phone') }}</p>
+          </div>
+          
+          <div>
+            <label for="birthdate" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+            <input 
+              type="date" 
+              id="birthdate" 
+              formControlName="birthdate" 
+              [readonly]="!isEditing"
+              [ngClass]="{'bg-gray-100': !isEditing, 'bg-white border-gray-300 focus:ring-2 focus:ring-blue-500': isEditing}"
+              class="w-full py-2 px-3 border rounded-lg focus:outline-none"
+            />
+          </div>
+          
+          <div>
+            <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+            <select 
+              id="gender" 
+              formControlName="gender" 
+              [disabled]="!isEditing"
+              [ngClass]="{'bg-gray-100': !isEditing, 'bg-white border-gray-300 focus:ring-2 focus:ring-blue-500': isEditing}"
+              class="w-full py-2 px-3 border rounded-lg focus:outline-none"
+            >
+              <option value="">Select</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Bio section -->
+        <div>
+          <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+          <textarea 
+            id="bio" 
+            formControlName="bio" 
+            [readonly]="!isEditing"
+            [ngClass]="{'bg-gray-100': !isEditing, 'bg-white border-gray-300 focus:ring-2 focus:ring-blue-500': isEditing}"
+            class="w-full py-2 px-3 border rounded-lg focus:outline-none"
+            rows="4"
+          ></textarea>
+        </div>
+        
+        <!-- Form action buttons -->
+        <div *ngIf="isEditing" class="flex justify-end space-x-3">
+          <button 
+            type="button"
+            (click)="toggleEditMode()"
+            class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit"
+            [disabled]="profileForm.invalid || isSaving"
+            class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors flex items-center"
+          >
+            <span *ngIf="isSaving" class="mr-2">
+              <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Order history tab -->
+    <div *ngIf="activeTab === 'orders'" class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold">Order History</h2>
+        <p class="text-gray-600 mt-1">View your recent orders and their status</p>
+      </div>
+      
+      <!-- Order list -->
+      <div *ngIf="orderHistory.length > 0" class="divide-y divide-gray-200">
+        <div *ngFor="let order of orderHistory" class="p-6 hover:bg-gray-50 transition-colors">
+          <div class="flex flex-col sm:flex-row justify-between">
+            <div>
+              <h3 class="font-semibold text-lg text-gray-900">{{ order.id }}</h3>
+              <p class="text-gray-600 mt-1">{{ order.date | date:'mediumDate' }}</p>
+              <div class="mt-2">
+                <span [ngClass]="order.statusClass" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                  {{ order.status }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="mt-4 sm:mt-0 text-right">
+              <p class="text-lg font-semibold text-gray-900">${{ order.total.toFixed(2) }}</p>
+              <p class="text-gray-600 mt-1">{{ order.items }} {{ order.items === 1 ? 'item' : 'items' }}</p>
+              <button class="mt-3 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm transition-colors">
+                View Order
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Empty state -->
+      <div *ngIf="orderHistory.length === 0" class="p-6 text-center">
+        <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+          <i class="fas fa-shopping-bag text-6xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">No orders yet</h3>
+        <p class="text-gray-600 mt-1">When you place orders, they will appear here</p>
+        <button class="mt-4 px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+          Shop Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Account settings tab -->
+    <div *ngIf="activeTab === 'settings'" class="space-y-6">
+      <!-- Saved addresses -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-semibold">Saved Addresses</h2>
+            <p class="text-gray-600 mt-1">Manage your delivery addresses</p>
+          </div>
+          <button class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center">
+            <i class="fas fa-plus mr-2"></i>
+            Add Address
+          </button>
+        </div>
+        
+        <div class="divide-y divide-gray-200">
+          <div *ngFor="let address of addresses" class="p-6 hover:bg-gray-50 transition-colors">
+            <div class="flex justify-between">
+              <div>
+                <div class="flex items-center">
+                  <h3 class="font-semibold text-gray-900">{{ address.type }}</h3>
+                  <span *ngIf="address.default" class="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">Default</span>
+                </div>
+                <p class="text-gray-600 mt-2">{{ address.street }}<br>{{ address.city }}, {{ address.state }} {{ address.zip }}<br>{{ address.country }}</p>
+              </div>
+              
+              <div class="flex items-start space-x-2">
+                <button class="p-2 text-gray-600 hover:text-gray-900 transition-colors">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="p-2 text-gray-600 hover:text-red-600 transition-colors">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Security settings -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-xl font-semibold">Security Settings</h2>
+          <p class="text-gray-600 mt-1">Manage your account security</p>
+        </div>
+        
+        <div class="divide-y divide-gray-200">
+          <div class="p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+            <div>
+              <h3 class="font-semibold text-gray-900">Password</h3>
+              <p class="text-gray-600 mt-1">Last changed 3 months ago</p>
+            </div>
+            <button class="mt-3 sm:mt-0 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors">
+              Change Password
+            </button>
+          </div>
+          
+          <div class="p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+            <div>
+              <h3 class="font-semibold text-gray-900">Two-Factor Authentication</h3>
+              <p class="text-gray-600 mt-1">Add an extra layer of security to your account</p>
+            </div>
+            <button class="mt-3 sm:mt-0 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors">
+              Enable 2FA
+            </button>
+          </div>
+          
+          <div class="p-6 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+            <div>
+              <h3 class="font-semibold text-gray-900">Delete Account</h3>
+              <p class="text-gray-600 mt-1">Permanently delete your account and all data</p>
+            </div>
+            <button class="mt-3 sm:mt-0 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors">
+              Delete Account
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Payment methods (placeholder) -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-semibold">Payment Methods</h2>
+            <p class="text-gray-600 mt-1">Manage your payment options</p>
+          </div>
+          <button class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center">
+            <i class="fas fa-plus mr-2"></i>
+            Add Method
+          </button>
+        </div>
+        
+        <div class="p-6 text-center">
+          <div class="mx-auto h-24 w-24 text-gray-400 mb-4">
+            <i class="fas fa-credit-card text-6xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900">No payment methods</h3>
+          <p class="text-gray-600 mt-1">Add a payment method to make checkout faster</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

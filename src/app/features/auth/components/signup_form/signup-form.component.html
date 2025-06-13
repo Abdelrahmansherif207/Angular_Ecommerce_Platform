@@ -1,0 +1,356 @@
+<!-- signup.component.html -->
+<div class="max-w-md w-full mx-auto p-6">
+  <div class="text-center mb-10">
+    <h2 class="text-3xl font-semibold text-gray-800">Create your account</h2>
+    <p class="text-gray-500 mt-2">Step {{ currentStep }} of {{ totalSteps }}</p>
+
+    <!-- Progress bar -->
+    <div class="mt-2 w-full bg-gray-200 rounded-full h-2.5">
+      <div
+        class="bg-zinc-900 h-2.5 rounded-full"
+        [style.width]="(currentStep / totalSteps) * 100 + '%'"
+      ></div>
+    </div>
+  </div>
+
+  <!-- Render request error if present -->
+  <div
+    *ngIf="requestError"
+    class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded"
+  >
+    {{ requestError }}
+  </div>
+
+  <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="">
+    <!-- Step 1: Profile Picture and Basic Info -->
+    <div *ngIf="currentStep === 1">
+      <!-- Profile Picture -->
+      <div class="mb-2 text-center">
+        <div
+          class="relative w-24 h-24 mx-auto mb-2 overflow-hidden rounded-full border-2 border-gray-200"
+        >
+          <img
+            [src]="profileImageUrl || '/images/pp.png'"
+            alt="Profile"
+            class="w-full h-full object-cover"
+            *ngIf="!isUploading"
+          />
+          <div
+            *ngIf="isUploading"
+            class="flex items-center justify-center w-full h-full bg-gray-100"
+          >
+            <i class="fas fa-spinner fa-spin text-gray-400 text-2xl"></i>
+          </div>
+          <label
+            class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+          >
+            <i class="fas fa-camera text-white text-xl"></i>
+            <input
+              type="file"
+              class="hidden"
+              accept="image/*"
+              (change)="onFileSelected($event)"
+              #fileInput
+            />
+          </label>
+        </div>
+        <p class="text-sm text-gray-500">
+          Click to upload a profile picture (optional)
+        </p>
+        <div *ngIf="uploadError" class="text-red-600 text-sm mt-1">
+          {{ uploadError }}
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-7">
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+          Email address
+        </label>
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <i class="fas fa-envelope text-gray-400"></i>
+          </div>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="you@example.com"
+          />
+        </div>
+        <div
+          *ngIf="step1Controls.email?.touched && step1Controls.email?.invalid"
+          class="text-red-600 text-sm mt-1"
+        >
+          <span *ngIf="step1Controls.email?.errors?.['required']"
+            >Email is required.</span
+          >
+          <span *ngIf="step1Controls.email?.errors?.['email']"
+            >Enter a valid email.</span
+          >
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-2">
+        <label
+          for="password"
+          class="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Password
+        </label>
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <i class="fas fa-lock text-gray-400"></i>
+          </div>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="block w-full pl-10 pr-3 py-3 border border-gray-300 shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-full"
+            placeholder="••••••••"
+          />
+        </div>
+        <div
+          *ngIf="
+            step1Controls.password?.touched && step1Controls.password?.invalid
+          "
+          class="text-red-600 text-sm mt-1"
+        >
+          <span *ngIf="step1Controls.password?.errors?.['required']"
+            >Password is required.</span
+          >
+          <span *ngIf="step1Controls.password?.errors?.['minlength']"
+            >Password must be at least 8 characters.</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Personal Information -->
+    <div *ngIf="currentStep === 2">
+      <!-- First Name -->
+      <div class="mb-6">
+        <label
+          for="firstName"
+          class="block text-sm font-medium text-gray-700 mb-1"
+        >
+          First Name
+        </label>
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <i class="fas fa-user text-gray-400"></i>
+          </div>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="John"
+          />
+        </div>
+        <div
+          *ngIf="
+            step2Controls.firstName?.touched && step2Controls.firstName?.invalid
+          "
+          class="text-red-600 text-sm mt-1"
+        >
+          <span *ngIf="step2Controls.firstName?.errors?.['required']"
+            >First name is required.</span
+          >
+        </div>
+      </div>
+
+      <!-- Last Name -->
+      <div>
+        <label
+          for="lastName"
+          class="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Last Name
+        </label>
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <i class="fas fa-user text-gray-400"></i>
+          </div>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Doe"
+          />
+        </div>
+        <div
+          *ngIf="
+            step2Controls.lastName?.touched && step2Controls.lastName?.invalid
+          "
+          class="text-red-600 text-sm mt-1"
+        >
+          <span *ngIf="step2Controls.lastName?.errors?.['required']"
+            >Last name is required.</span
+          >
+        </div>
+      </div>
+
+      <!-- Account Type -->
+      <div class="mt-6">
+        <label for="role" class="block text-sm font-medium text-gray-700 mb-1"
+          >Account Type</label
+        >
+        <select
+          id="role"
+          formControlName="role"
+          class="block w-full px-3 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+        <div
+          *ngIf="
+            signupForm.get('role')?.touched && signupForm.get('role')?.invalid
+          "
+          class="text-red-600 text-sm mt-1"
+        >
+          <span *ngIf="signupForm.get('role')?.errors?.['required']"
+            >Account type is required.</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Contact Information -->
+    <div *ngIf="currentStep === 3">
+      <!-- Phone -->
+      <div class="mb-6">
+        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+          Phone Number
+        </label>
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <i class="fas fa-phone text-gray-400"></i>
+          </div>
+          <input
+            id="phone"
+            type="tel"
+            formControlName="phone"
+            class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="1234567890"
+          />
+        </div>
+        <div
+          *ngIf="step3Controls.phone?.touched && step3Controls.phone?.invalid"
+          class="text-red-600 text-sm mt-1"
+        >
+          <span *ngIf="step3Controls.phone?.errors?.['required']"
+            >Phone is required.</span
+          >
+          <span *ngIf="step3Controls.phone?.errors?.['pattern']"
+            >Enter a valid 10-digit phone number.</span
+          >
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div>
+        <label
+          for="address"
+          class="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Address
+        </label>
+        <div class="relative">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+          >
+            <i class="fas fa-map-marker-alt text-gray-400"></i>
+          </div>
+          <input
+            id="address"
+            type="text"
+            formControlName="address"
+            class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-full shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="123 Main St"
+          />
+        </div>
+        <div
+          *ngIf="
+            step3Controls.address?.touched && step3Controls.address?.invalid
+          "
+          class="text-red-600 text-sm mt-1"
+        >
+          <span *ngIf="step3Controls.address?.errors?.['required']"
+            >Address is required.</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="flex justify-between mt-2">
+      <button
+        *ngIf="currentStep > 1"
+        type="button"
+        (click)="prevStep()"
+        class="px-4 py-2 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Back
+      </button>
+
+      <button
+        *ngIf="currentStep < totalSteps"
+        type="button"
+        (click)="nextStep()"
+        [disabled]="!validateCurrentStep()"
+        class="ml-auto px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-black hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next
+      </button>
+
+      <button
+        *ngIf="currentStep === totalSteps"
+        type="submit"
+        [disabled]="signupForm.invalid"
+        class="ml-auto px-4 py-2 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-black hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Sign Up
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-6">
+    <div class="relative">
+      <div class="absolute inset-0 flex items-center">
+        <div class="w-full border-t border-gray-300"></div>
+      </div>
+      <div class="relative flex justify-center text-sm">
+        <span class="px-2 bg-white text-gray-500"
+          >Already have an account?</span
+        >
+      </div>
+    </div>
+
+    <!-- File input for reference only (not part of the form) -->
+    <input type="file" class="hidden" #fileInputControl />
+
+    <div class="mt-2">
+      <a
+        routerLink="/login"
+        class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Sign in instead
+      </a>
+    </div>
+  </div>
+</div>
