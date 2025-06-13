@@ -43,12 +43,14 @@
         >
           <div class="relative h-full">
             <!-- Product image as background -->
+            <!-- [style.backgroundImage]="'url(' + product.imageUrl + ')'" -->
             <div
-              class="absolute inset-0 bg-cover bg-center"
-              [style.backgroundImage]="'url(' + product.imageUrl + ')'"
+              class="absolute inset-0 bg-cover bg-center h-full"
+              [style.backgroundImage]="'url(assets/images/slide1.jpg)'"
             ></div>
+
             <!-- Dark overlay -->
-            <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+            <!-- <div class="absolute inset-0 bg-black bg-opacity-90"></div> -->
 
             <!-- Product info -->
             <div
@@ -61,23 +63,16 @@
                   SPECIAL OFFER
                 </div>
                 <h2
-                  class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4"
+                  class="text-3xl md:text-4xl lg:text-5xl font-bold text-pink-900 mb-4"
                 >
                   {{ product.name }}
                 </h2>
-                <p class="text-lg text-gray-300 mb-6 overflow-hidden max-h-24">
+                <p class="text-lg text-white mb-6 overflow-hidden max-h-24">
                   {{ product.description }}
                 </p>
                 <div class="flex items-center mb-6">
                   <span class="text-3xl font-bold text-white"
                     >${{ product.price.toFixed(2) }}</span
-                  >
-                  <span class="ml-3 text-lg text-gray-400 line-through"
-                    >${{ (product.price * 1.4).toFixed(2) }}</span
-                  >
-                  <span
-                    class="ml-3 px-3 py-1 bg-green-600 text-white rounded-lg"
-                    >SAVE 40%</span
                   >
                 </div>
                 <div class="flex flex-wrap gap-4">
