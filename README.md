@@ -1,43 +1,47 @@
 # EcommerceApp
+---
+
 ## 📸 UI Snapshots
 
 ### 🔐 Authentication
 
-| Sign In | Sign Up Step 1 | Sign Up Step 2 | Sign Up Step 3 |
-|--------|----------------|----------------|----------------|
-| ![](./snapshot/singin.png) | ![](./snapshot/signup1.png) | ![](./snapshot/signup2.png) | ![](./snapshot/signup3.png) |
+![Sign In](snapshot/singin.png)  
+![Sign Up 1](snapshot/signup1.png)  
+![Sign Up 2](snapshot/signup2.png)  
+![Sign Up 3](snapshot/signup3.png)  
 
 ---
 
 ### 🏠 Home
 
-| Home Page |
-|-----------|
-| ![](./snapshot/home.png) |
+![Home](snapshot/home.png)
 
 ---
 
 ### 🛍️ User Panel
 
-| Product List | Product Grid | Cart | Checkout | Order History | Profile Info |
-|--------------|--------------|------|----------|----------------|--------------|
-| ![](./snapshot/user-products-list.png) | ![](./snapshot/user-products-grid.png) | ![](./snapshot/cart.png) | ![](./snapshot/checkout.png) | ![](./snapshot/user-order-history.png) | ![](./snapshot/user-profile-info.png) |
+![User Products List](snapshot/user-products-list.png)  
+![User Products Grid](snapshot/user-products-grid.png)  
+![Cart](snapshot/cart.png)  
+![Checkout](snapshot/checkout.png)  
+![Order History](snapshot/user-order-history.png)  
+![Profile Info](snapshot/user-profile-info.png)  
 
 ---
 
 ### 🛠️ Admin Panel
 
-| Dashboard | Orders | Add Product | Edit Product | Navigation |
-|-----------|--------|-------------|--------------|------------|
-| ![](./snapshot/admin-dashboard.png) | ![](./snapshot/admin-orders.png) | ![](./snapshot/admin-add.png) | ![](./snapshot/admin-edit.png) | ![](./snapshot/admin-nav.png) |
+![Admin Dashboard](snapshot/admin-dashboard.png)  
+![Admin Orders](snapshot/admin-orders.png)  
+![Add Product](snapshot/admin-add.png)  
+![Edit Product](snapshot/admin-edit.png)  
+![Admin Navigation](snapshot/admin-nav.png)  
 
 ---
 
 ### 📭 Empty States
 
-| Empty Cart |
-|------------|
-| ![](./snapshot/empty-cart.png) |
+![Empty Cart](snapshot/empty-cart.png)
 
 ---
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.7.
