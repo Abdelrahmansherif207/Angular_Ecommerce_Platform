@@ -1,5 +1,45 @@
 # EcommerceApp
+## 📸 UI Snapshots
 
+### 🔐 Authentication
+
+| Sign In | Sign Up Step 1 | Sign Up Step 2 | Sign Up Step 3 |
+|--------|----------------|----------------|----------------|
+| ![](./snapshot/singin.png) | ![](./snapshot/signup1.png) | ![](./snapshot/signup2.png) | ![](./snapshot/signup3.png) |
+
+---
+
+### 🏠 Home
+
+| Home Page |
+|-----------|
+| ![](./snapshot/home.png) |
+
+---
+
+### 🛍️ User Panel
+
+| Product List | Product Grid | Cart | Checkout | Order History | Profile Info |
+|--------------|--------------|------|----------|----------------|--------------|
+| ![](./snapshot/user-products-list.png) | ![](./snapshot/user-products-grid.png) | ![](./snapshot/cart.png) | ![](./snapshot/checkout.png) | ![](./snapshot/user-order-history.png) | ![](./snapshot/user-profile-info.png) |
+
+---
+
+### 🛠️ Admin Panel
+
+| Dashboard | Orders | Add Product | Edit Product | Navigation |
+|-----------|--------|-------------|--------------|------------|
+| ![](./snapshot/admin-dashboard.png) | ![](./snapshot/admin-orders.png) | ![](./snapshot/admin-add.png) | ![](./snapshot/admin-edit.png) | ![](./snapshot/admin-nav.png) |
+
+---
+
+### 📭 Empty States
+
+| Empty Cart |
+|------------|
+| ![](./snapshot/empty-cart.png) |
+
+---
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.7.
 
 ## Development server
