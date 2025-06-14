@@ -4,10 +4,9 @@
 
 ## 🎬 Demo Video
 
-[Watch Demo]([https://your-demo-video-url.com](https://drive.google.com/drive/folders/1zIc-Z_eRD2gSSAFNdqoGgaSoYHruaK3Q?usp=sharing))
+[Watch Demo](https://drive.google.com/drive/folders/1zIc-Z_eRD2gSSAFNdqoGgaSoYHruaK3Q)
 
 ---
-
 ## 📸 UI Snapshots
 
 ### 🔐 Authentication
